@@ -56,10 +56,10 @@
       <h3 id="animation">Animation</h3>
       <p>The path a voxel traverses is calculated using <a href="https://en.wikipedia.org/wiki/Centripetal_Catmull%E2%80%93Rom_spline">Catmull-Rom-Splines</a> which are already integrated in Three.js. The control points are the starting point, a hypothetical contact point with another voxel, and a contact point with the floor. These points and the rotation are randomized using the seed. The resulting curve is then sampled corresponding to the <strong>segments</strong> parameter. The calculation of the speed is mainly based on the physics model of <a href="http://www.studyphysics.ca/newnotes/20/unit01_kinematicsdynamics/chp06_vectors/lesson25.htm">Gravity on Inclined Planes</a> with some tweaks aiming to make the animation look more like a real physics simulation.</p>
       
-      <video width="640" height="360" controls>
+      <!-- <video width="640" height="360" controls>
         <source src="/assets/block_decay_example_video-695fc2d8.mp4" type="video/mp4">
         Your browser does not support the video tag.
-      </video>
+      </video> -->
       <h2 id="future-work">Future Work</h2>
       <p>Even though the voxelization process is much faster than the Raycasting approach, the computational efforts make it unfit for real time applications. the voxelization and animation could be preprocessed, however, the resulting memory requirements would make it difficult to have multiple high resolution voxelized representations in one scene at the same time. In order to achieve this, the algorithm would have to be ported to the GPU. This should be possible since most steps are trivially parallelizable, but such a solution has yet to be implemented.</p>
       <h2 id="attributions">Attributions</h2>
