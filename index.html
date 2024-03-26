@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/threejs-icon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Three.js + TypeScript + Vite</title>
+    
+    
+
+    <!-- Include Prism.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism-okaidia.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/prism.min.js"></script>
+
+    <!-- Include TypeScript language definition -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/components/prism-typescript.min.js"></script>
+    <script type="module" crossorigin src="/assets/index-70a4bf2c.js"></script>
+    <link rel="stylesheet" href="/assets/index-f9f8d575.css">
+  </head>
+  <body>
+    <canvas id="scene"></canvas>
+    <div id="text">
+      <h1 id="about-this-project">About this project</h1>
+      <p>ModelDecay introduces a solution to voxelization and animation within the Three.js framework. This tool enables developers to take a 3D model and convert it into a voxelized representation, subsequently animating the fall of these voxels. This project was created as a part of the “Extending the Three.js Framework” seminar given by the Computer Graphics Systems chair at the <a href="https://hpi.de/en/index.html">Hasso-Plattner-Institute</a>. The prinicipal objective was to examine the possibility of vanishing/decaying 3D model as a type of Object in Three.js tested specifically on said voxelization effect.</p>
+      <h2 id="usage">Usage</h2>
+      <p>At first, the developer needs to create a Group containing the object(s) that should be voxelized. This group could for example be the loaded in version of a model in a data format compatible with Three.js. Afterwards, the developer can create a <strong>ModelDecay</strong> object and pass the necessary parameters.</p>
+      <p>Example:</p>
+      <pre><code class="language-typescript">
+      // load the model 
+      const loader = new GLTFLoader();
+      loader.load(&#39;models/Astronaut.glb&#39;, (gltf) =&gt; {
+        // create the object
+        const decayingObject = new ModelDecay({
+          model: gltf.scene, 
+          resolution: 10,
+          boxFill: 1,
+          segments: 7,
+          gravity: 3, 
+          seed: 278947,
+        });
+        // 
+      });</code></pre>
+      <h2 id="parameters">Parameters</h2>
+      <ul>
+      <li><strong>model</strong>: the Object3D that should be voxelized</li>
+      <li><strong>resolution</strong>: determines the grid size along the largest dimension of the passed <strong>model</strong></li>
+      <li><strong>boxFill</strong>: the relative size of one voxel with respect to the size of one grid cell</li>
+      <li><strong>gravity</strong>: the force with which the voxels will fall to the ground (the ground is determined by the relative transformation of the object)</li>
+      <li><strong>segments</strong>: the number of segments used for sampling the calculated animation path (7 is enough according to my experience)</li>
+      <li><strong>seed</strong>: the seed used for randomizing the animation the animation</li>
+      </ul>
+      <h2 id="how-it-works">How it works</h2>
+      <p>The implementation can be divided up in <strong>Voxelization</strong> and <strong>Animation</strong>.</p>
+      <h3 id="voxelization">Voxelization</h3>
+      <p>When googling how to voxelize meshes in Three.js, the search results present an approach using Raycasting. Raycasting, however, suffers from great performance issues which is why I looked for an alternative approach. This has led me to the paper <a href="https://doi.org/10.1111/j.1467-8659.2008.01210.x">Computing Local Signed Distance Fields for Large Polygonal Models, by B. Chang et al</a>. This paper introduces a method for creating a voxelized representation of a mesh (i.e. its outer bounds) which I implemented. Afterwards, the voxels get painted by either the color of the mesh’s material or by sampling a color from the mesh’s texture based on the voxel’s sorrounding vertices (vertex colors are not yet supported). The color of the inner voxels are determined by interpolating between those of the outer bound.</p>
+      <h3 id="animation">Animation</h3>
+      <p>The path a voxel traverses is calculated using <a href="https://en.wikipedia.org/wiki/Centripetal_Catmull%E2%80%93Rom_spline">Catmull-Rom-Splines</a> which are already integrated in Three.js. The control points are the starting point, a hypothetical contact point with another voxel, and a contact point with the floor. These points and the rotation are randomized using the seed. The resulting curve is then sampled corresponding to the <strong>segments</strong> parameter. The calculation of the speed is mainly based on the physics model of <a href="http://www.studyphysics.ca/newnotes/20/unit01_kinematicsdynamics/chp06_vectors/lesson25.htm">Gravity on Inclined Planes</a> with some tweaks aiming to make the animation look more like a real physics simulation.</p>
+      
+      <video width="640" height="360" controls>
+        <source src="/assets/block_decay_example_video-695fc2d8.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+      <h2 id="future-work">Future Work</h2>
+      <p>Even though the voxelization process is much faster than the Raycasting approach, the computational efforts make it unfit for real time applications. the voxelization and animation could be preprocessed, however, the resulting memory requirements would make it difficult to have multiple high resolution voxelized representations in one scene at the same time. In order to achieve this, the algorithm would have to be ported to the GPU. This should be possible since most steps are trivially parallelizable, but such a solution has yet to be implemented.</p>
+      <h2 id="attributions">Attributions</h2>
+      <p>The models in this demo are <a href="https://poly.pizza/m/dLHpzNdygsg">Astronaut</a> by <a href="https://poly.pizza/u/Poly%20by%20Google">Poly by Google</a> [CC-BY] via Poly Pizza, <a href="https://skfb.ly/oPZWW">Earth</a> by RamonaFlowers🌼[https://sketchfab.com/ramonaflowers] is licensed under <a href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution</a>.</p>
+      
+    </div>
+
+  </body>
+</html>
